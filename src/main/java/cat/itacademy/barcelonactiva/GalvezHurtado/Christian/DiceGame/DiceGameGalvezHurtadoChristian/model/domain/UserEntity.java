@@ -7,7 +7,6 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-import java.util.Date;
 import java.util.List;
 
 @Data
@@ -21,7 +20,7 @@ public class UserEntity {
     @Field(name = "name")
     private String name;
     @Field(name = "registration")
-    private Date registration;
+    private String registration;
     @Field(name = "password")
     private String password;
     @Field(name = "role")

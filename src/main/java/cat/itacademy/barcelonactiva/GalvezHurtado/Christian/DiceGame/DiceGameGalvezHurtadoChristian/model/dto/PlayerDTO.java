@@ -5,10 +5,10 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.sql.Timestamp;
-import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Data
@@ -18,7 +18,7 @@ public class PlayerDTO {
 
     private String id;
     private String name;
-    private Date registration = Timestamp.from(Instant.now());
+    private String registration = dateTime();
     private String password;
     private List<DataPlayerEntity> dataPlayer = new ArrayList<>();
     private double percentage;
@@ -26,5 +26,13 @@ public class PlayerDTO {
     public PlayerDTO(String name, double percent) {
         this.name = name;
         this.percentage = percent;
+    }
+
+    private String dateTime(){
+        ZoneId barcelonaZone = ZoneId.of("Europe/Madrid");
+        ZonedDateTime now = ZonedDateTime.now(barcelonaZone);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm:ss");
+        String formattedDate = formatter.format(now);
+        return formattedDate;
     }
 }

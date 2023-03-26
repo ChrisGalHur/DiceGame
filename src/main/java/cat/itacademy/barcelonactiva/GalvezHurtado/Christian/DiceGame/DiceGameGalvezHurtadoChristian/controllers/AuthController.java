@@ -17,6 +17,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.NoSuchElementException;
+
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
@@ -27,8 +29,7 @@ public class AuthController {
     private final PlayerServiceImpl playerServiceimpl;
     private final RoleService roleService;
     private final JWTGenerator jwtGenerator;
-
-
+    
     //region LOGIN-REGISTER
     @PostMapping("/login")
     public ResponseEntity<AuthResponseDTO> login(@RequestBody LoginDTO loginDTO) {
@@ -38,19 +39,22 @@ public class AuthController {
         return new ResponseEntity<>(new AuthResponseDTO(token), HttpStatus.OK);
     }
 
-    @PostMapping("/register")
+    @PostMapping("/registerUser")
     public ResponseEntity<String> register(@RequestBody PlayerDTO userDTO) {
         if (userRepository.existsByName((userDTO.getName()))) {
             return new ResponseEntity<>("User already exists", HttpStatus.BAD_REQUEST);
         }
+        try {
+            if (userDTO.getName() == null || userDTO.getName().equals("")) {
+                userDTO.setName("UNKNOWN");
+                playerServiceimpl.saveNewUser(userDTO);
+                return new ResponseEntity<>("Your name is: " + userDTO.getName(), HttpStatus.OK);
+            }
 
-        if (userDTO.getName() == null || userDTO.getName().equals("")) {
-            userDTO.setName("UNKNOWN");
             playerServiceimpl.saveNewUser(userDTO);
-            return new ResponseEntity<>("Your name is: " + userDTO.getName(), HttpStatus.OK);
+        }catch(NoSuchElementException e){
+            return new ResponseEntity<>("Doesn't exists role USER.", HttpStatus.NOT_FOUND);
         }
-
-        playerServiceimpl.saveNewUser(userDTO);
         return new ResponseEntity<>("User registered!", HttpStatus.OK);
     }
     //endregion LOGIN-REGISTER
@@ -61,14 +65,14 @@ public class AuthController {
         final String PASSWORD = "SoloYo";
 
         if (!pass.equals(PASSWORD)) {
-            return new ResponseEntity<>("Password wrong", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("Password wrong.", HttpStatus.BAD_REQUEST);
         } else if (roleService.existsByName(role.getName())) {
-            return new ResponseEntity<>("Role already exists", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("Role already exists.", HttpStatus.BAD_REQUEST);
         } else if (pass.equals(PASSWORD)) {
             roleService.saveRole(role);
-            return new ResponseEntity<>("success", HttpStatus.OK);
+            return new ResponseEntity<>("Success!", HttpStatus.OK);
         } else {
-            return new ResponseEntity<>("failure", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("Failure!", HttpStatus.BAD_REQUEST);
         }
     }
 
